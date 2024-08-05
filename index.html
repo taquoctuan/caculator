@@ -224,15 +224,17 @@
     const displayInput = document.querySelector('.display .input');
     const displayOutput = document.querySelector('.display .output');
     const keys = document.querySelector('.keys');
+    
     let currentInput = '';
     let currentOutput = '';
 
     keys.addEventListener('click', function (event) {
         const key = event.target.closest('.key');
-        if (!key) return;
+        if (!key) return; // Nếu không phải là nút, thì thoát
 
-        const keyValue = key.dataset.key;
+        const keyValue = key.dataset.key; // Lấy giá trị của nút nhấn
 
+        // Phân loại nút nhấn và xử lý tương ứng
         if (key.classList.contains('action')) {
             handleAction(keyValue);
         } else if (key.classList.contains('operator')) {
@@ -245,54 +247,68 @@
     function handleAction(action) {
         switch (action) {
             case 'clear':
+                // Xóa toàn bộ đầu vào và kết quả
                 currentInput = '';
                 currentOutput = '';
                 break;
             case 'backspace':
+                // Xóa ký tự cuối cùng trong đầu vào
                 currentInput = currentInput.slice(0, -1);
                 break;
             case '%':
-                currentInput = `${parseFloat(currentInput) / 100}`;
+                // Xử lý phần trăm bằng cách thêm ký tự '%' vào đầu vào
+                currentInput += '%';
                 break;
             case 'brackets':
-                // Handle brackets if needed
+                // Xử lý dấu ngoặc nếu cần
                 break;
             default:
                 break;
         }
-        updateDisplay();
+        updateDisplay(); // Cập nhật giao diện sau khi thực hiện hành động
     }
 
     function handleOperator(operator) {
         if (operator === '=') {
             try {
+                // Tính toán kết quả của biểu thức
                 currentOutput = calculateResult(currentInput);
             } catch (error) {
+                // Nếu có lỗi trong tính toán, hiển thị 'Error'
                 currentOutput = 'Error';
             }
-            currentInput = `${currentOutput}`;
+            currentInput = `${currentOutput}`; // Cập nhật đầu vào với kết quả
         } else {
+            // Thêm ký tự phép toán vào đầu vào
             currentInput += operator;
         }
-        updateDisplay();
+        updateDisplay(); // Cập nhật giao diện sau khi thêm phép toán
     }
 
     function handleNumber(number) {
+        // Thêm số hoặc dấu chấm vào đầu vào
         currentInput += number;
-        updateDisplay();
+        updateDisplay(); // Cập nhật giao diện sau khi thêm số
     }
 
     function calculateResult(expression) {
         try {
-            // Replace `x` with `*` for multiplication
+            // Thay thế ký tự 'x' bằng '*' và '÷' bằng '/' để phù hợp với cú pháp JavaScript
             expression = expression.replace(/x/g, '*');
-            // Replace `÷` with `/` for division
             expression = expression.replace(/÷/g, '/');
+            
+            // Nếu có ký tự '%' trong biểu thức, tính toán phần trăm
+            if (expression.includes('%')) {
+                // Tính toán phần trăm cho biểu thức
+                expression = expression.replace(/(\d+)%/g, function(match, p1) {
+                    return p1 / 100;
+                });
+            }
 
-            // Create a new Function to evaluate the expression
-            // This method is safer than eval but should still be used carefully
+            // Sử dụng hàm Function để tính toán biểu thức
             return new Function('return ' + expression)();
         } catch (error) {
+            // Nếu có lỗi trong tính toán, trả về 'Error'
             return 'Error';
         }
     }
@@ -302,6 +318,8 @@
         displayOutput.textContent = currentOutput;
     }
 });
+
+
      </script>
 </body>
 </html>
