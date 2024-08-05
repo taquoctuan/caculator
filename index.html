@@ -16,18 +16,18 @@
         .app {
 	        display: flex;
 	        justify-content: center;
-    	    	align-items: center;
+    	    align-items: center;
 	        height: 100vh;
         }
 
         .calculator {
 	        background-color: #22252D;
-           	 width: 100%;
+            width: 100%;
 	        max-width: 375px;
 	        min-height: 640px;
 	        display: flex;
 	        flex-direction: column;
-    	    	border-radius: 1.5rem;
+    	    border-radius: 1.5rem;
 	        overflow: hidden;
         }
 
@@ -38,7 +38,7 @@
 	        justify-content: flex-end;
 	        align-items: flex-end;
 	        color: white;
-            	text-align: right;
+            text-align: right;
 	        flex: 1 1 0%;
         }
 
@@ -47,20 +47,20 @@
 	        flex-direction: column;
 	        justify-content: flex-end;
 	        width: 100%;
-            	max-width: 100%;
+            max-width: 100%;
 	        overflow: auto;
         }
 
         .display .input {
 	        width: 100%;
-            	font-size: 1.25rem;
+            font-size: 1.25rem;
 	        margin-bottom: 0.5rem;
         }
 
         .display .output {
 	        font-size: 3rem;
 	        font-weight: 700;
-           	width: 100%;
+            width: 100%;
 	        white-space: nowrap;
         }
 
@@ -80,7 +80,7 @@
 	        display: grid;
 	        grid-template-columns: repeat(4, 1fr);
 	        grid-template-rows: repeat(5, 1fr);
-            	grid-gap: 1rem;
+            grid-gap: 1rem;
 	        box-shadow: 0px -2px 16px rgba(0, 0, 0, 0.2);
         }
 
@@ -92,7 +92,7 @@
 	        padding-top: 100%;
 	        background-color: #262933;
 	        border-radius: 1rem;
-            	transition: 0.2s;
+            transition: 0.2s;
 	        user-select: none;
         }
 
@@ -102,7 +102,7 @@
 	        left: 50%;
 	        transform: translate(-50%, -50%);
 	        font-size: 2rem;
-           	font-weight: 700;
+            font-weight: 700;
 	        color: #FFF;
         }
 
@@ -220,99 +220,88 @@
 	</div>
 
 	<script>
-        document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
     const displayInput = document.querySelector('.display .input');
     const displayOutput = document.querySelector('.display .output');
-    const keys = document.querySelectorAll('.key');
+    const keys = document.querySelector('.keys');
+    let currentInput = '';
+    let currentOutput = '';
 
-    let currentInput = ''; // Biến lưu trữ đầu vào hiện tại
-    
-    /**
-     * Hàm tính toán biểu thức với nhiều phép toán
-     * @param {string} expr - Biểu thức toán học
-     * @returns {number} - Kết quả của phép toán
-     */
-    function calculateExpression(expr) {
-        // Xử lý các phép toán nhân và chia trước
-        const multiplyDivide = (expression) => {
-            const multiplyDivideRegex = /(\d+(\.\d+)?)\s*([*/])\s*(\d+(\.\d+)?)/g;
-            let match;
+    keys.addEventListener('click', function (event) {
+        const key = event.target.closest('.key');
+        if (!key) return;
 
-            while ((match = multiplyDivideRegex.exec(expression)) !== null) {
-                const [fullMatch, num1, , operator, num2] = match;
-                const result = operator === '*' ? parseFloat(num1) * parseFloat(num2) :
-                               operator === '/' ? parseFloat(num1) / parseFloat(num2) : 0;
-                expression = expression.replace(fullMatch, result);
-            }
-            return expression;
-        };
+        const keyValue = key.dataset.key;
 
-        // Xử lý các phép toán cộng và trừ
-        const addSubtract = (expression) => {
-            const addSubtractRegex = /(\d+(\.\d+)?)\s*([+-])\s*(\d+(\.\d+)?)/g;
-            let match;
+        if (key.classList.contains('action')) {
+            handleAction(keyValue);
+        } else if (key.classList.contains('operator')) {
+            handleOperator(keyValue);
+        } else {
+            handleNumber(keyValue);
+        }
+    });
 
-            while ((match = addSubtractRegex.exec(expression)) !== null) {
-                const [fullMatch, num1, , operator, num2] = match;
-                const result = operator === '+' ? parseFloat(num1) + parseFloat(num2) :
-                               operator === '-' ? parseFloat(num1) - parseFloat(num2) : 0;
-                expression = expression.replace(fullMatch, result);
-            }
-            return expression;
-        };
-
-        // Xử lý các phép toán nhân và chia
-        expr = multiplyDivide(expr);
-        // Xử lý các phép toán cộng và trừ
-        expr = addSubtract(expr);
-
-        return parseFloat(expr);
+    function handleAction(action) {
+        switch (action) {
+            case 'clear':
+                currentInput = '';
+                currentOutput = '';
+                break;
+            case 'backspace':
+                currentInput = currentInput.slice(0, -1);
+                break;
+            case '%':
+                currentInput = `${parseFloat(currentInput) / 100}`;
+                break;
+            case 'brackets':
+                // Handle brackets if needed
+                break;
+            default:
+                break;
+        }
+        updateDisplay();
     }
 
-    // Xử lý sự kiện nhấn nút
-    keys.forEach(key => {
-        key.addEventListener('click', function() {
-            const keyValue = this.getAttribute('data-key');
-
-            if (keyValue === 'clear') {
-                // Xóa mọi dữ liệu khi nhấn nút AC
-                currentInput = '';
-                displayInput.textContent = '';
-                displayOutput.textContent = '';
-            } else if (keyValue === 'backspace') {
-                // Xóa ký tự cuối cùng khi nhấn nút <-
-                currentInput = currentInput.slice(0, -1);
-                displayInput.textContent = currentInput;
-            } else if (keyValue === '=') {
-                // Tính toán kết quả khi nhấn nút =
-                if (currentInput !== '') {
-                    try {
-                        const result = calculateExpression(currentInput);
-                        displayOutput.textContent = result;
-                        currentInput = result;
-                    } catch (e) {
-                        // Hiển thị lỗi nếu có vấn đề trong quá trình tính toán
-                        displayOutput.textContent = 'Error';
-                    }
-                }
-            } else if (['+', '-', '*', '/'].includes(keyValue)) {
-                // Xử lý toán tử
-                if (currentInput !== '' && !['+', '-', '*', '/'].includes(currentInput.slice(-1))) {
-                    currentInput += keyValue;
-                } else if (currentInput !== '') {
-                    // Thay thế toán tử nếu đã có toán tử cuối cùng
-                    currentInput = currentInput.slice(0, -1) + keyValue;
-                }
-                displayInput.textContent = currentInput;
-            } else {
-                // Thêm ký tự vào đầu vào hiện tại
-                currentInput += keyValue;
-                displayInput.textContent = currentInput;
+    function handleOperator(operator) {
+        if (operator === '=') {
+            try {
+                currentOutput = calculateResult(currentInput);
+            } catch (error) {
+                currentOutput = 'Error';
             }
-        });
-    });
-});
+            currentInput = `${currentOutput}`;
+        } else {
+            currentInput += operator;
+        }
+        updateDisplay();
+    }
 
-    </script>
+    function handleNumber(number) {
+        currentInput += number;
+        updateDisplay();
+    }
+
+    function calculateResult(expression) {
+        try {
+            // Replace `x` with `*` for multiplication
+            expression = expression.replace(/x/g, '*');
+            // Replace `÷` with `/` for division
+            expression = expression.replace(/÷/g, '/');
+
+            // Create a new Function to evaluate the expression
+            // This method is safer than eval but should still be used carefully
+            return new Function('return ' + expression)();
+        } catch (error) {
+            return 'Error';
+        }
+    }
+
+    function updateDisplay() {
+        displayInput.textContent = currentInput;
+        displayOutput.textContent = currentOutput;
+    }
+});
+     </script>
 </body>
 </html>
