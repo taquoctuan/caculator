@@ -276,8 +276,8 @@
             } catch (error) {
                 // Nếu có lỗi trong tính toán, hiển thị 'Error'
                 currentOutput = 'Error';
-            }
-            currentInput = `${currentOutput}`; // Cập nhật đầu vào với kết quả
+            };
+
         } else {
             // Thêm ký tự phép toán vào đầu vào
             currentInput += operator;
@@ -306,7 +306,9 @@
             }
 
             // Sử dụng hàm Function để tính toán biểu thức
-            return new Function('return ' + expression)();
+            let result = new Function('return ' + expression)();
+			 // Làm tròn kết quả đến 10 chữ số thập phân
+			return Math.round(result * 1e10) / 1e10;
         } catch (error) {
             // Nếu có lỗi trong tính toán, trả về 'Error'
             return 'Error';
@@ -316,7 +318,7 @@
     function updateDisplay() {
         displayInput.textContent = currentInput;
         displayOutput.textContent = currentOutput;
-    }
+    };
 });
 
 
